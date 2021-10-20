@@ -1,0 +1,208 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ürünler</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="~/js/site.js"></script>
+    <link href="~/css/site.css" rel="stylesheet" />
+</head>
+<body>
+
+    <div class="page">
+        <div class="col-sm-12"style="margin-bottom:10px;">
+
+            <button type="button"onclick="AddCategoryModal()" class="btn-info btn btn-xs buttongroup"> Kategori Ekle</button>
+            <button type="button" onclick="AddProductModal()" class="btn-danger btn btn-xs buttongroup">Ürün Ekle</button>
+        </div>
+        <table class="table table-sm" id="table">
+
+
+            <thead>
+                <tr>
+                    <th>Ürün Adı</th>
+                    <th>Kategori İsmi</th>
+                    <th>Kayıt Tarihi</th>
+
+            </thead>
+
+
+        </table>
+    </div>
+
+
+
+    <div class="modal" tabindex="-1" id="mesajModal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Uyarı Mesajı</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalIcerik"></div>
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addProduct" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ürün Ekle</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Ürün Adı</label>
+                        <input type="text" class="form-control" id="productName">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Kategori</label>
+                        <select class="form-control" id="categories" aria-label="Default select example">
+                        </select>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Vazgeç</button>
+                    <button type="button" onclick="AddProduct()" class="btn btn-primary">Ekle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Kategori Ekle</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Kategori Adı</label>
+                        <input type="text" class="form-control" id="categoryName">
+                    </div>
+                  
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Vazgeç</button>
+                    <button type="button" onclick="AddCategory()" class="btn btn-primary">Ekle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+<script type="text/javascript">
+  
+    function List() {
+        $("#table tbody").remove();
+        $.get("/Home/List", function (data) {
+
+            if (data.status == false) {
+
+                $('#myModal').modal('show');
+            }
+            else {
+
+
+                $('#table').html;
+
+
+            
+                for (var item in data.data) {
+                    var veri = '<tbody><tr><td>' + data.data[item].name + '</td><td>' + data.data[item].category + '</td><td>' + data.data[item].createdDate + '</td>';
+                    $('#table').append(veri);
+                }
+            }
+        });
+
+    }
+
+    function AddProductModal() {
+
+        $("#categories option").remove();
+        $.get("Home/CategoryList", function (data) {
+          
+            for (var item in data.data) {
+              
+                $("#categories").append('<option value=' + data.data[item].id + '>' + data.data[item].name + '</option>');
+            }
+            $('#addProduct').modal('show');
+        });
+    }
+    function AddProduct() {
+
+        var id = $( "#categories").val();
+        var name = $("#productName").val();
+        $.post("/Home/AddProduct",
+            {
+                name: name,
+               category: id
+            },
+            function (data) {
+
+                $('#modalIcerik').html;
+                $("#modalIcerik").append('<p>' + 'İşlem Başarılı'+ '</p>');
+
+                $('#addProduct').modal('hide');
+                $('#mesajModal').modal('show');
+                List();
+                    
+                
+            });
+
+    }
+    function AddCategoryModal() {
+        $('#addCategoryModal').modal('show');
+  
+    }
+    function AddCategory() {
+      
+        var name = $("#categoryName").val();
+        $.post("/Home/AddCategory",
+            {
+                name: name
+            },
+            function (data) {
+
+                console.log(data);
+                $('#modalIcerik').html;
+                $("#modalIcerik").append('<p>' +'İşlem Başarılı'+ '</p>');
+
+                $('#addCategoryModal').modal('hide');
+                $('#mesajModal').modal('show');
+
+
+
+            });
+        
+    }
+    $(document).ready(function () {
+
+
+        List();
+    });
+    
+</script>
